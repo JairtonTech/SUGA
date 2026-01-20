@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, UserProfile } from './types';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { Layout } from './components/Layout';
 import { Login } from './components/Login';
 import { Dashboard } from './components/Dashboard';
@@ -14,13 +15,29 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('login');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authUser: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (authUser: User | null) => {
       if (authUser) {
+        let userRole = 'convidado';
+
+        try {
+          if (authUser.email) {
+            const userDocRef = doc(db, 'users', authUser.email);
+            const userSnap = await getDoc(userDocRef);
+
+            if (userSnap.exists()) {
+              userRole = userSnap.data().role;
+            }
+          }
+        } catch (error) {
+          console.error("Erro ao buscar permissões:", error);
+        }
+
         setUser({
-          name: authUser.displayName || 'Administrador',
+          name: authUser.displayName || 'Usuário',
           email: authUser.email,
-          role: 'admin'
+          role: userRole
         });
+
         if (currentView === 'login') {
           setCurrentView('dashboard');
         }
@@ -68,7 +85,7 @@ const App: React.FC = () => {
       {currentView === 'login' && <Login />}
       {currentView === 'dashboard' && <Dashboard navigate={navigate} />}
       {currentView === 'personnel' && <PersonnelList navigate={navigate} />}
-      {currentView === 'processes' && <ProcessSuite navigate={navigate} />}
+      {currentView === 'processes' && <ProcessSuite navigate={navigate} user={user} />}
     </Layout>
   );
 };
