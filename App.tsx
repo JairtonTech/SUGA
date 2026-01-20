@@ -17,20 +17,24 @@ const App: React.FC = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (authUser: User | null) => {
       if (authUser) {
-        let userRole = 'convidado';
+        // Regra alterada: Todos os usuários recebem nível de admin
+        const userRole = 'admin';
 
+        /* 
+        // Lógica anterior desativada para forçar admin para todos
         try {
           if (authUser.email) {
             const userDocRef = doc(db, 'users', authUser.email);
             const userSnap = await getDoc(userDocRef);
 
             if (userSnap.exists()) {
-              userRole = userSnap.data().role;
+              // userRole = userSnap.data().role;
             }
           }
         } catch (error) {
           console.error("Erro ao buscar permissões:", error);
         }
+        */
 
         setUser({
           name: authUser.displayName || 'Usuário',
