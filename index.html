@@ -82,9 +82,9 @@
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
+    "firebase/": "https://esm.sh/firebase@^12.8.0/",
     "react/": "https://esm.sh/react@^19.2.3/",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "firebase/": "https://esm.sh/firebase@^12.8.0/",
     "xlsx": "https://esm.sh/xlsx@^0.18.5"
   }
 }
@@ -116,8 +116,6 @@
       const db = firebase.firestore();
 
       // --- SHIMS TO MAKE MODULAR CODE WORK WITH COMPAT SDK ---
-      // These functions mimic the V9 Modular SDK used in your original files
-      // but use the V8 Compat SDK loaded in the head.
       const collection = (dbInstance, path) => dbInstance.collection(path);
       const doc = (dbInstance, path, id) => id ? dbInstance.collection(path).doc(id) : dbInstance.doc(path);
       const addDoc = (ref, data) => ref.add(data);
@@ -125,7 +123,6 @@
       const updateDoc = (ref, data) => ref.update(data);
       const Timestamp = firebase.firestore.Timestamp;
       
-      // Query Shim (Simplified for this app's usage)
       const query = (ref, ...constraints) => {
         let q = ref;
         constraints.forEach(c => {
@@ -502,8 +499,9 @@
           const reader = new FileReader();
           reader.onload = async (evt) => {
             try {
-              const bstr = evt.target?.result;
-              const wb = XLSX.read(bstr, { type: 'binary' });
+              // Changed: Use readAsArrayBuffer for better ODS/Excel compatibility
+              const ab = evt.target?.result;
+              const wb = XLSX.read(ab, { type: 'array' });
               const wsname = wb.SheetNames[0];
               const ws = wb.Sheets[wsname];
               const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
@@ -511,24 +509,58 @@
               let importedCount = 0;
               const batchPromises = [];
 
+              // Helper function to robustly parse dates from Excel/ODS
+              const parseDate = (val) => {
+                if (!val) return new Date().toISOString().split('T')[0];
+                
+                // If number (Excel/LibreOffice serial date)
+                if (typeof val === 'number') {
+                   // Adjust for Excel/LibreOffice date serial
+                   const date = new Date(Math.round((val - 25569)*86400*1000));
+                   // Check if valid date
+                   if (!isNaN(date.getTime())) {
+                     return date.toISOString().split('T')[0];
+                   }
+                }
+                
+                // If string, try to parse
+                if (typeof val === 'string') {
+                   // Try standard ISO
+                   let date = new Date(val);
+                   if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+                   
+                   // Try PT-BR format DD/MM/YYYY
+                   const parts = val.split('/');
+                   if (parts.length === 3) {
+                     // Try DD/MM/YYYY
+                     date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                     if (!isNaN(date.getTime())) return date.toISOString().split('T')[0];
+                   }
+                }
+                
+                // Fallback to today
+                return new Date().toISOString().split('T')[0];
+              };
+
               for (let i = 1; i < data.length; i++) {
                 const row = data[i];
                 if (row && row.length > 0) {
-                  let dateStr = row[0];
-                  if (typeof row[0] === 'number') {
-                      const date = new Date(Math.round((row[0] - 25569)*86400*1000));
-                      dateStr = date.toISOString().split('T')[0];
-                  }
+                  // Assume Column A: Date, B: NUP, C: Description
+                  const rawDate = row[0];
+                  const rawNup = row[1];
+                  const rawDesc = row[2];
 
-                  const processData = {
-                    data: dateStr || new Date().toISOString().split('T')[0],
-                    nup: String(row[1] || ''),
-                    description: String(row[2] || ''),
-                    createdAt: Timestamp.now()
-                  };
+                  const dateStr = parseDate(rawDate);
+                  const nupStr = String(rawNup || '');
+                  const descStr = String(rawDesc || '');
 
-                  if (processData.nup || processData.description) {
-                     batchPromises.push(addDoc(collection(db, 'processes'), processData));
+                  if (nupStr.trim() || descStr.trim()) {
+                     batchPromises.push(addDoc(collection(db, 'processes'), {
+                        data: dateStr,
+                        nup: nupStr,
+                        description: descStr,
+                        createdAt: Timestamp.now()
+                     }));
                      importedCount++;
                   }
                 }
@@ -538,13 +570,13 @@
               alert(`${importedCount} registros importados com sucesso!`);
             } catch (error) {
               console.error("Import error:", error);
-              alert("Erro ao processar arquivo. Verifique o formato.");
+              alert("Erro ao processar arquivo. Verifique se o arquivo não está corrompido e se é um formato válido.");
             } finally {
               setImporting(false);
               if (fileInputRef.current) fileInputRef.current.value = '';
             }
           };
-          reader.readAsBinaryString(file);
+          reader.readAsArrayBuffer(file);
         };
 
         const filteredProcesses = processes.filter(p => 
@@ -591,7 +623,7 @@
                   type="file" 
                   ref={fileInputRef}
                   onChange={handleFileUpload}
-                  accept=".xlsx,.xls,.ods,.csv"
+                  accept=".xlsx,.xls,.ods,.csv,.xlsb,.xlsm,.xml,.fods"
                   className="hidden"
                 />
                 
