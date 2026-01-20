@@ -11,8 +11,9 @@ interface ProcessSuiteProps {
 
 // Helper component to highlight text
 const HighlightText = ({ text, highlight }: { text: string, highlight: string }) => {
+  const val = text || '';
   if (!highlight.trim()) {
-    return <>{text}</>;
+    return <span>{val}</span>;
   }
 
   const escapeRegExp = (string: string) => {
@@ -20,18 +21,18 @@ const HighlightText = ({ text, highlight }: { text: string, highlight: string })
   };
 
   const regex = new RegExp(`(${escapeRegExp(highlight)})`, 'gi');
-  const parts = text.split(regex);
+  const parts = val.split(regex);
 
   return (
-    <>
+    <span>
       {parts.map((part, i) => 
         part.toLowerCase() === highlight.toLowerCase() ? (
           <span key={i} className="bg-yellow-300 text-black font-extrabold px-0.5 rounded-sm shadow-sm border-b-2 border-yellow-500">{part}</span>
         ) : (
-          part
+          <span key={i}>{part}</span>
         )
       )}
-    </>
+    </span>
   );
 };
 
@@ -181,35 +182,66 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
     }
   };
 
+  // Robust Date Parser
   const parseDate = (val: any): string => {
     if (!val) return new Date().toISOString().split('T')[0];
 
+    // 1. Handle JS Date Objects (from cellDates: true)
+    if (val instanceof Date) {
+      // Use getFullYear/Month/Date to avoid UTC shifts
+      const year = val.getFullYear();
+      const month = String(val.getMonth() + 1).padStart(2, '0');
+      const day = String(val.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // 2. Handle Excel Serial Numbers (fallback)
     if (typeof val === 'number') {
+      // Excel base date logic
       const date = new Date(Math.round((val - 25569) * 86400 * 1000));
-      date.setHours(12); 
+      // Add a few hours to be safe against timezone shifts
+      date.setHours(12);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
       if (!isNaN(date.getTime())) {
-         return date.toISOString().split('T')[0];
+         return `${year}-${month}-${day}`;
       }
     }
 
+    // 3. Handle Strings
     if (typeof val === 'string') {
       const trimmed = val.trim();
-      const ptBrMatch = trimmed.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+      
+      // Try DD/MM/YYYY or DD-MM-YYYY
+      // Supports 1 or 2 digits for day/month, and 2 or 4 for year
+      const ptBrMatch = trimmed.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
       if (ptBrMatch) {
         const day = ptBrMatch[1].padStart(2, '0');
         const month = ptBrMatch[2].padStart(2, '0');
-        const year = ptBrMatch[3];
+        let year = ptBrMatch[3];
+        if (year.length === 2) year = '20' + year; // Assume 20xx
         return `${year}-${month}-${day}`;
       }
+
+      // Try YYYY-MM-DD (ISO)
       const isoMatch = trimmed.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
       if (isoMatch) {
-         return trimmed; 
+         // Reconstruct to ensure padding
+         const year = isoMatch[1];
+         const month = isoMatch[2].padStart(2, '0');
+         const day = isoMatch[3].padStart(2, '0');
+         return `${year}-${month}-${day}`;
       }
+      
+      // Last resort: standard Date parsing
       const date = new Date(val);
       if (!isNaN(date.getTime())) {
         return date.toISOString().split('T')[0];
       }
     }
+    
+    // Fallback to today if all else fails
     return new Date().toISOString().split('T')[0];
   };
 
@@ -223,7 +255,8 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
     reader.onload = async (evt) => {
       try {
         const ab = evt.target?.result;
-        const wb = XLSX.read(ab, { type: 'array' });
+        // IMPORTANT: cellDates: true helps recognize dates correctly
+        const wb = XLSX.read(ab, { type: 'array', cellDates: true });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
         const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
@@ -234,6 +267,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
         for (let i = 1; i < data.length; i++) {
           const row: any = data[i];
           if (row && row.length > 0) {
+            // Assume row[0] is date, row[1] NUP, row[2] Description
             const dateStr = parseDate(row[0]);
             const nupStr = String(row[1] || '').trim();
             const descriptionStr = String(row[2] || '').trim();
