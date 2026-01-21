@@ -488,8 +488,13 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                       href="https://suite.ce.gov.br/" 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      onClick={(e) => {
+                          if (process.nup) {
+                              navigator.clipboard.writeText(process.nup);
+                          }
+                      }}
                       className="text-sm font-bold text-indigo-600 font-mono tracking-tight bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-800 inline-flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors cursor-pointer group/link" 
-                      title="Abrir no sistema SUITE"
+                      title="Abrir no SUITE e Copiar NUP"
                     >
                       <HighlightText text={process.nup || 'Sem NUP'} highlight={searchTerm} />
                       <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-0 group-hover/link:opacity-100 transition-opacity"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
