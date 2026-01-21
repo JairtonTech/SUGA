@@ -1,4 +1,5 @@
-export type ViewState = 'login' | 'dashboard' | 'personnel' | 'processes';
+
+export type ViewState = 'login' | 'dashboard' | 'personnel' | 'personnel-detail' | 'processes';
 
 export interface Sector {
   id: string;
@@ -10,6 +11,15 @@ export interface Process {
   data: string;
   nup: string;
   description: string;
+}
+
+export interface Personnel {
+  id: string;
+  name: string;
+  role: string;
+  registration: string; // Matrícula
+  status: 'Ativo' | 'Férias' | 'Licença';
+  sector: string;
 }
 
 export interface UserProfile {
