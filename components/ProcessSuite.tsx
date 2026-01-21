@@ -39,6 +39,7 @@ const HighlightText = ({ text, highlight }: { text: string, highlight: string })
 export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) => {
   const [processes, setProcesses] = useState<Process[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedYear, setSelectedYear] = useState(''); // New State for Year Filter
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -62,9 +63,9 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
   useEffect(() => {
     const q = query(collection(db, 'processes'), orderBy('data', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      const docs = snapshot.docs.map(processDoc => ({
+        id: processDoc.id,
+        ...processDoc.data()
       })) as Process[];
       setProcesses(docs);
       setLoading(false);
@@ -73,11 +74,21 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
     return () => unsubscribe();
   }, []);
 
-  // Filter processes
-  const filteredProcesses = processes.filter(p => 
-    p.nup.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Calculate Available Years from data
+  const availableYears = Array.from(new Set(processes.map(p => 
+    p.data ? p.data.substring(0, 4) : ''
+  ))).filter((y: string) => y && /^\d{4}$/.test(y)).sort().reverse();
+
+  // Filter processes (Search Term + Year)
+  const filteredProcesses = processes.filter(p => {
+    const matchesSearch = p.nup.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const processYear = p.data ? p.data.substring(0, 4) : '';
+    const matchesYear = selectedYear === '' || processYear === selectedYear;
+
+    return matchesSearch && matchesYear;
+  });
 
   // Selection Logic
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,7 +199,6 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
 
     // 1. Handle JS Date Objects (from cellDates: true)
     if (val instanceof Date) {
-      // Use getFullYear/Month/Date to avoid UTC shifts
       const year = val.getFullYear();
       const month = String(val.getMonth() + 1).padStart(2, '0');
       const day = String(val.getDate()).padStart(2, '0');
@@ -197,9 +207,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
 
     // 2. Handle Excel Serial Numbers (fallback)
     if (typeof val === 'number') {
-      // Excel base date logic
       const date = new Date(Math.round((val - 25569) * 86400 * 1000));
-      // Add a few hours to be safe against timezone shifts
       date.setHours(12);
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -212,36 +220,27 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
     // 3. Handle Strings
     if (typeof val === 'string') {
       const trimmed = val.trim();
-      
-      // Try DD/MM/YYYY or DD-MM-YYYY
-      // Supports 1 or 2 digits for day/month, and 2 or 4 for year
       const ptBrMatch = trimmed.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
       if (ptBrMatch) {
         const day = ptBrMatch[1].padStart(2, '0');
         const month = ptBrMatch[2].padStart(2, '0');
         let year = ptBrMatch[3];
-        if (year.length === 2) year = '20' + year; // Assume 20xx
+        if (year.length === 2) year = '20' + year; 
         return `${year}-${month}-${day}`;
       }
-
-      // Try YYYY-MM-DD (ISO)
       const isoMatch = trimmed.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
       if (isoMatch) {
-         // Reconstruct to ensure padding
          const year = isoMatch[1];
          const month = isoMatch[2].padStart(2, '0');
          const day = isoMatch[3].padStart(2, '0');
          return `${year}-${month}-${day}`;
       }
-      
-      // Last resort: standard Date parsing
       const date = new Date(val);
       if (!isNaN(date.getTime())) {
         return date.toISOString().split('T')[0];
       }
     }
     
-    // Fallback to today if all else fails
     return new Date().toISOString().split('T')[0];
   };
 
@@ -255,7 +254,6 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
     reader.onload = async (evt) => {
       try {
         const ab = evt.target?.result;
-        // IMPORTANT: cellDates: true helps recognize dates correctly
         const wb = XLSX.read(ab, { type: 'array', cellDates: true });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
@@ -267,7 +265,6 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
         for (let i = 1; i < data.length; i++) {
           const row: any = data[i];
           if (row && row.length > 0) {
-            // Assume row[0] is date, row[1] NUP, row[2] Description
             const dateStr = parseDate(row[0]);
             const nupStr = String(row[1] || '').trim();
             const descriptionStr = String(row[2] || '').trim();
@@ -299,7 +296,6 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
   };
 
   const handleExport = () => {
-    // If items are selected, export ONLY those. Otherwise, export ALL filtered items.
     const itemsToExport = selectedIds.length > 0 
       ? filteredProcesses.filter(p => selectedIds.includes(p.id))
       : filteredProcesses;
@@ -341,7 +337,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
             <div>
               <h1 className="text-3xl font-black text-gray-800 uppercase tracking-tight leading-none mb-1">Processos Suite</h1>
               <div className="flex gap-2 items-center">
-                <p className="text-[11px] font-bold text-blue-500 uppercase tracking-[0.2em]">Total: {processes.length}</p>
+                <p className="text-[11px] font-bold text-blue-500 uppercase tracking-[0.2em]">Total: {filteredProcesses.length} Registros</p>
                 {selectedIds.length > 0 && (
                   <span className="text-[11px] font-bold text-suga-dark uppercase tracking-[0.2em] bg-emerald-100 px-2 rounded-full">
                     Selecionados: {selectedIds.length}
@@ -352,6 +348,24 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
+            
+            {/* Year Filter */}
+            <div className="relative">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="appearance-none bg-white border border-gray-200 rounded-lg py-2.5 pl-4 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm font-bold text-gray-600 cursor-pointer h-[42px] hover:border-emerald-500 transition-colors"
+              >
+                <option value="">Todos os Anos</option>
+                {availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+              </div>
+            </div>
+
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-4 w-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -363,14 +377,14 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 placeholder="Filtrar processos..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 bg-white border border-gray-200 rounded-lg py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-w-[280px] shadow-sm transition-all font-medium text-gray-600"
+                className="pl-10 pr-4 bg-white border border-gray-200 rounded-lg py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-w-[280px] shadow-sm transition-all font-medium text-gray-600 h-[42px]"
               />
             </div>
             
             {/* Button 1: Export */}
             <button 
               onClick={handleExport}
-              className="bg-white border border-gray-300 text-gray-700 hover:border-emerald-600 hover:text-emerald-600 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap"
+              className="bg-white border border-gray-300 text-gray-700 hover:border-emerald-600 hover:text-emerald-600 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
               title={selectedIds.length > 0 ? "Exportar Selecionados" : "Exportar Todos"}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -391,7 +405,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importing}
-                  className="bg-white border border-gray-300 text-gray-700 hover:border-suga-dark hover:text-suga-dark font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap"
+                  className="bg-white border border-gray-300 text-gray-700 hover:border-suga-dark hover:text-suga-dark font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
                 >
                   {importing ? (
                     <span className="animate-spin h-3.5 w-3.5 border-2 border-suga-dark border-t-transparent rounded-full"></span>
@@ -405,7 +419,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 <button 
                   type="button"
                   onClick={handleOpenNew}
-                  className="bg-suga-dark hover:bg-emerald-800 text-white font-bold text-xs px-6 py-2.5 rounded-lg uppercase transition-all shadow-lg shadow-emerald-900/20 whitespace-nowrap flex items-center gap-2"
+                  className="bg-suga-dark hover:bg-emerald-800 text-white font-bold text-xs px-6 py-2.5 rounded-lg uppercase transition-all shadow-lg shadow-emerald-900/20 whitespace-nowrap flex items-center gap-2 h-[42px]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   Novo Registro
@@ -417,7 +431,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
             {canDelete && selectedIds.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
-                className="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap"
+                className="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Excluir ({selectedIds.length})
@@ -513,7 +527,7 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 Nenhum registro encontrado
               </div>
               <p className="text-[10px] text-gray-300 font-medium">
-                Utilize o botão "Novo Registro" para começar
+                {searchTerm || selectedYear ? 'Tente ajustar os filtros' : 'Utilize o botão "Novo Registro" para começar'}
               </p>
             </div>
           )}
