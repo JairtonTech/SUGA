@@ -39,7 +39,7 @@ const HighlightText = ({ text, highlight }: { text: string, highlight: string })
 export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) => {
   const [processes, setProcesses] = useState<Process[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedYear, setSelectedYear] = useState(''); // New State for Year Filter
+  const [selectedYear, setSelectedYear] = useState(''); 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -319,27 +319,27 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
   };
 
   return (
-    <div className="relative max-w-[1600px] mx-auto">
+    <div className="relative max-w-[1600px] mx-auto pb-12">
       {/* Wrapper animado para o conteúdo (Header e Tabela) */}
       <div className="animate-fade-in">
         
         {/* Header Bar */}
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-5">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 mb-10">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => navigate('dashboard')}
-              className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-suga-dark hover:shadow-md transition-all shrink-0 border border-transparent hover:border-gray-100"
+              className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-600 hover:border-indigo-600 hover:shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 shrink-0"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
               </svg>
             </button>
             <div>
-              <h1 className="text-3xl font-black text-gray-800 uppercase tracking-tight leading-none mb-1">Processos Suite</h1>
-              <div className="flex gap-2 items-center">
-                <p className="text-[11px] font-bold text-blue-500 uppercase tracking-[0.2em]">Total: {filteredProcesses.length} Registros</p>
+              <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none mb-1">Processos Suite</h1>
+              <div className="flex gap-3 items-center mt-1">
+                <p className="text-xs font-bold text-indigo-500 uppercase tracking-[0.2em] bg-indigo-50 px-3 py-1 rounded-full">Total: {filteredProcesses.length}</p>
                 {selectedIds.length > 0 && (
-                  <span className="text-[11px] font-bold text-suga-dark uppercase tracking-[0.2em] bg-emerald-100 px-2 rounded-full">
+                  <span className="text-xs font-bold text-white uppercase tracking-[0.2em] bg-emerald-500 px-3 py-1 rounded-full shadow-md shadow-emerald-500/20">
                     Selecionados: {selectedIds.length}
                   </span>
                 )}
@@ -354,21 +354,21 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="appearance-none bg-white border border-gray-200 rounded-lg py-2.5 pl-4 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm font-bold text-gray-600 cursor-pointer h-[42px] hover:border-emerald-500 transition-colors"
+                className="appearance-none bg-white border border-slate-200 rounded-xl py-3 pl-4 pr-10 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 shadow-sm font-bold text-slate-600 cursor-pointer h-[48px] hover:border-indigo-400 transition-colors"
               >
                 <option value="">Todos os Anos</option>
                 {availableYears.map(year => (
                     <option key={year} value={year}>{year}</option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
               </div>
             </div>
 
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-4 w-4 text-gray-400 group-focus-within:text-emerald-500 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -377,17 +377,17 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 placeholder="Filtrar processos..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 bg-white border border-gray-200 rounded-lg py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent min-w-[280px] shadow-sm transition-all font-medium text-gray-600 h-[42px]"
+                className="pl-12 pr-4 bg-white border border-slate-200 rounded-xl py-3 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 min-w-[300px] shadow-sm transition-all font-medium text-slate-600 h-[48px]"
               />
             </div>
             
             {/* Button 1: Export */}
             <button 
               onClick={handleExport}
-              className="bg-white border border-gray-300 text-gray-700 hover:border-emerald-600 hover:text-emerald-600 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
+              className="bg-white border border-slate-200 text-slate-600 hover:border-indigo-600 hover:text-indigo-600 font-bold text-xs px-6 py-3 rounded-xl uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[48px]"
               title={selectedIds.length > 0 ? "Exportar Selecionados" : "Exportar Todos"}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               {selectedIds.length > 0 ? `Exportar (${selectedIds.length})` : "Exportar"}
             </button>
 
@@ -405,12 +405,12 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   disabled={importing}
-                  className="bg-white border border-gray-300 text-gray-700 hover:border-suga-dark hover:text-suga-dark font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
+                  className="bg-white border border-slate-200 text-slate-600 hover:border-violet-600 hover:text-violet-600 font-bold text-xs px-6 py-3 rounded-xl uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[48px]"
                 >
                   {importing ? (
-                    <span className="animate-spin h-3.5 w-3.5 border-2 border-suga-dark border-t-transparent rounded-full"></span>
+                    <span className="animate-spin h-4 w-4 border-2 border-violet-600 border-t-transparent rounded-full"></span>
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                   )}
                   Importar
                 </button>
@@ -419,9 +419,9 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
                 <button 
                   type="button"
                   onClick={handleOpenNew}
-                  className="bg-suga-dark hover:bg-emerald-800 text-white font-bold text-xs px-6 py-2.5 rounded-lg uppercase transition-all shadow-lg shadow-emerald-900/20 whitespace-nowrap flex items-center gap-2 h-[42px]"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-8 py-3 rounded-xl uppercase transition-all shadow-lg shadow-indigo-600/20 whitespace-nowrap flex items-center gap-2 h-[48px] transform active:scale-95"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   Novo Registro
                 </button>
               </>
@@ -431,9 +431,9 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
             {canDelete && selectedIds.length > 0 && (
               <button 
                 onClick={handleBulkDelete}
-                className="bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 font-bold text-xs px-5 py-2.5 rounded-lg uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[42px]"
+                className="bg-red-50 border border-red-200 text-red-600 hover:bg-red-600 hover:text-white font-bold text-xs px-6 py-3 rounded-xl uppercase transition-all shadow-sm flex items-center gap-2.5 whitespace-nowrap h-[48px]"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Excluir ({selectedIds.length})
               </button>
             )}
@@ -441,14 +441,14 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
         </div>
 
         {/* Main Table Area */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-[2.5rem] shadow-card border border-slate-100 overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-12 gap-6 px-8 py-5 bg-gray-50/50 border-b border-gray-100 text-[11px] font-extrabold text-gray-400 uppercase tracking-widest select-none">
+          <div className="grid grid-cols-12 gap-6 px-10 py-6 bg-slate-50/80 border-b border-slate-100 text-xs font-extrabold text-slate-400 uppercase tracking-widest select-none">
             {/* Checkbox Column */}
             <div className="col-span-1 flex items-center">
               <input 
                 type="checkbox"
-                className="w-4 h-4 rounded text-suga-dark focus:ring-suga-dark cursor-pointer accent-suga-dark"
+                className="w-5 h-5 rounded-md text-indigo-600 focus:ring-indigo-600 cursor-pointer border-gray-300"
                 onChange={handleSelectAll}
                 checked={filteredProcesses.length > 0 && selectedIds.length === filteredProcesses.length}
               />
@@ -461,57 +461,57 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
 
           {/* Table Content */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-80">
-              <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-100 border-t-suga-dark mb-4"></div>
-              <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Carregando dados...</span>
+            <div className="flex flex-col items-center justify-center h-96">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-slate-100 border-t-indigo-600 mb-6"></div>
+              <span className="text-sm font-bold text-slate-300 uppercase tracking-widest">Carregando dados...</span>
             </div>
           ) : filteredProcesses.length > 0 ? (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-slate-50">
               {filteredProcesses.map((process) => (
-                <div key={process.id} className={`grid grid-cols-12 gap-6 px-8 py-6 items-center transition-colors group ${selectedIds.includes(process.id) ? 'bg-emerald-50/60' : 'hover:bg-emerald-50/20'}`}>
+                <div key={process.id} className={`grid grid-cols-12 gap-6 px-10 py-5 items-center transition-all duration-200 group ${selectedIds.includes(process.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50'}`}>
                   {/* Checkbox Row */}
                   <div className="col-span-1 flex items-center">
                     <input 
                       type="checkbox"
-                      className="w-4 h-4 rounded text-suga-dark focus:ring-suga-dark cursor-pointer accent-suga-dark"
+                      className="w-5 h-5 rounded-md text-indigo-600 focus:ring-indigo-600 cursor-pointer border-gray-300"
                       checked={selectedIds.includes(process.id)}
                       onChange={() => handleSelectOne(process.id)}
                     />
                   </div>
                   <div className="col-span-2">
-                    <div className="text-xs font-semibold text-gray-500">
+                    <div className="text-sm font-bold text-slate-500">
                       {process.data ? new Date(process.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <div className="text-xs font-bold text-emerald-700 font-mono tracking-tight" title={process.nup}>
+                    <div className="text-sm font-bold text-indigo-600 font-mono tracking-tight bg-indigo-50 inline-block px-2 py-1 rounded-md" title={process.nup}>
                       <HighlightText text={process.nup || 'Sem NUP'} highlight={searchTerm} />
                     </div>
                   </div>
                   <div className="col-span-5">
-                    <div className="text-sm font-medium text-gray-600 leading-relaxed">
+                    <div className="text-base font-medium text-slate-700 leading-relaxed">
                       <HighlightText text={process.description} highlight={searchTerm} />
                     </div>
                   </div>
-                  <div className={`col-span-2 flex justify-end gap-2 transition-opacity ${selectedIds.includes(process.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                  <div className={`col-span-2 flex justify-end gap-3 transition-opacity ${selectedIds.includes(process.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                     {canWrite && (
                       <button 
                         onClick={() => handleOpenEdit(process)}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-all"
+                        className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100 shadow-sm"
                         title="Editar"
                         type="button"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       </button>
                     )}
                     {canDelete && (
                       <button 
                         onClick={() => handleDelete(process.id)}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                        className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all border border-transparent hover:border-red-100 shadow-sm"
                         title="Excluir"
                         type="button"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                       </button>
                     )}
                   </div>
@@ -519,14 +519,14 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-80 text-center">
-              <div className="bg-gray-50 rounded-full p-6 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+              <div className="bg-slate-50 rounded-full p-8 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-300"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
               </div>
-              <div className="text-gray-400 font-bold text-xs uppercase tracking-widest mb-1">
+              <div className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-1">
                 Nenhum registro encontrado
               </div>
-              <p className="text-[10px] text-gray-300 font-medium">
+              <p className="text-xs text-slate-300 font-medium">
                 {searchTerm || selectedYear ? 'Tente ajustar os filtros' : 'Utilize o botão "Novo Registro" para começar'}
               </p>
             </div>
@@ -536,71 +536,82 @@ export const ProcessSuite: React.FC<ProcessSuiteProps> = ({ navigate, user }) =>
 
       {/* Modal Form (Create/Edit) - MOVED OUTSIDE THE ANIMATED CONTAINER */}
       {isModalOpen && canWrite && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-suga-dark/40 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-white/50 transform transition-all scale-100">
-            <div className="bg-suga-dark px-6 py-5 flex justify-between items-center border-b border-white/10">
-              <h2 className="text-white font-bold text-sm uppercase tracking-widest">
-                {editingId ? 'Editar Registro' : 'Novo Registro de Processo'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-xl overflow-hidden border border-white/50 transform transition-all scale-100">
+            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-8 py-6 flex justify-between items-center shadow-lg">
+              <h2 className="text-white font-bold text-base uppercase tracking-widest flex items-center gap-2">
+                 {editingId ? (
+                   <>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                     Editar Registro
+                   </>
+                 ) : (
+                   <>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                     Novo Registro
+                   </>
+                 )}
               </h2>
               <button 
                 type="button"
                 onClick={() => setIsModalOpen(false)} 
-                className="text-white/50 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-lg p-1"
+                className="text-white/70 hover:text-white transition-colors bg-white/10 hover:bg-white/20 rounded-xl p-2"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             
-            <form onSubmit={handleSave} className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <form onSubmit={handleSave} className="p-10 space-y-8">
+              <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <label className="block text-[10px] font-extrabold text-gray-400 uppercase mb-2 tracking-widest">Data do Registro</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Data do Registro</label>
                   <input
                     type="date"
                     required
                     value={formData.data}
                     onChange={(e) => setFormData({...formData, data: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-suga-medium/50 focus:border-suga-medium font-semibold text-gray-700 transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-bold text-slate-700 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-extrabold text-gray-400 uppercase mb-2 tracking-widest">Número NUP</label>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Número NUP</label>
                   <input
                     type="text"
                     required
                     placeholder="00000.000000/0000-00"
                     value={formData.nup}
                     onChange={(e) => setFormData({...formData, nup: e.target.value})}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-suga-medium/50 focus:border-suga-medium font-semibold text-gray-700 transition-all font-mono"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-bold text-slate-700 transition-all font-mono"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-[10px] font-extrabold text-gray-400 uppercase mb-2 tracking-widest">Descrição detalhada</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-3 tracking-widest">Descrição detalhada</label>
                 <textarea
                   required
-                  rows={4}
+                  rows={5}
                   placeholder="Insira os detalhes do processo aqui..."
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-suga-medium/50 focus:border-suga-medium font-medium text-gray-700 resize-none transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl p-4 text-base focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-medium text-slate-700 resize-none transition-all"
                 />
               </div>
 
-              <div className="pt-4 flex gap-3 justify-end border-t border-gray-50 mt-4">
+              <div className="pt-6 flex gap-4 justify-end border-t border-slate-50 mt-6">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-3 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-wider"
+                  className="px-6 py-4 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors uppercase tracking-wider"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-3 rounded-xl text-xs font-bold text-white bg-suga-dark hover:bg-suga-medium transition-all transform active:scale-95 uppercase tracking-wider shadow-lg shadow-emerald-900/10 flex items-center gap-2"
+                  className="px-10 py-4 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 transition-all transform active:scale-95 uppercase tracking-wider shadow-xl shadow-indigo-600/20 flex items-center gap-3"
                 >
                   {editingId ? 'Salvar Alterações' : 'Confirmar Registro'}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>
               </div>
             </form>
